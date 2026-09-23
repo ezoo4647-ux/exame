@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الامتحان الشامل المتنوع - مركز أورسيتي للتدريب</title>
+    <style>
+        :root {
+            --primary-color: #1b365d;
+            --secondary-color: #4b6b94;
+            --accent-color: #f39c12;
+            --bg-color: #f4f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #dcdfe6;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        .header-bar { background-color: var(--primary-color); color: #ffffff; padding: 15px 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .header-bar h1 { margin: 0; font-size: 1.5rem; }
+        .student-info-strip { background-color: var(--secondary-color); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; font-size: 0.95rem; font-weight: bold; }
+        .container { max-width: 800px; margin: 30px auto; padding: 20px; width: 95%; flex: 1; }
+        .card { background-color: var(--card-bg); border-radius: 10px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border-color); margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--primary-color); }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
+        .btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 25px; font-size: 1rem; border-radius: 6px; cursor: pointer; transition: background 0.3s; }
+        .btn:hover { background-color: var(--secondary-color); }
+        .btn-success { background-color: var(--success-color); }
+        .btn-success:hover { background-color: #219150; }
+        .btn-secondary { background-color: #7f8c8d; }
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+        .progress-container { width: 100%; background-color: #e0e0e0; border-radius: 10px; height: 10px; margin-bottom: 20px; overflow: hidden; }
+        .progress-bar { height: 100%; background-color: var(--accent-color); width: 0%; transition: width 0.3s; }
+        .question-card { display: none; }
+        .question-card.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .option-label { display: block; background: #f8f9fa; border: 1px solid var(--border-color); padding: 12px 15px; border-radius: 6px; margin-bottom: 10px; cursor: pointer; }
+        .option-label:hover { background: #eef2f7; border-color: var(--secondary-color); }
+        .hidden { display: none !important; }
+        .score-box { text-align: center; background: #eef2f7; padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 2px solid var(--primary-color); }
+        .score-number { font-size: 2.5rem; font-weight: bold; color: var(--primary-color); }
+        .review-q { padding: 15px; border-radius: 8px; margin-bottom: 15px; border-right: 5px solid #ccc; }
+        .review-q.correct { background-color: #e8f8f5; border-right-color: var(--success-color); }
+        .review-q.incorrect { background-color: #fadbd8; border-right-color: var(--danger-color); }
+        .correct-ans-text { font-weight: bold; color: var(--success-color); margin-top: 5px; }
+        .user-ans-text { font-weight: bold; margin-top: 5px; }
+        .q-badge { display: inline-block; background: var(--secondary-color); color: white; padding: 3px 10px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <h1>مركز أورسيتي للتدريب</h1>  <h2>Nr.Moez Mortada Mohammed Ali</h2>
+        <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 4px;">الامتحان الشامل المتنوع (50 سؤالاً - الدرجة الكلية: 100)</div>
+    </div>
+
+    <div id="studentStrip" class="student-info-strip hidden">
+        <div><span>اسم الطالب: </span><span id="stripName">-</span></div>
+        <div><span>رقم الدفعة: </span><span id="stripBatch">-</span></div>
+        <div><span>التقدم: </span><span id="stripProgress">1 من 50</span></div>
+    </div>
+
+    <div class="container">
+        
+        <!-- Registration Card -->
+        <div id="registrationCard" class="card">
+            <h2 style="color: var(--primary-color); text-align: center; margin-bottom: 25px;">تسجيل بيانات الطالب لبدء الامتحان</h2>
+            <form id="startExamForm">
+                <div class="form-group">
+                    <label for="studentName">الاسم الرباعي <span style="color: red;">*</span></label>
+                    <input type="text" id="studentName" required placeholder="أدخل اسمك الرباعي كاملاً">
+                </div>
+                <div class="form-group">
+                    <label for="batchNumber">رقم الدفعة / التمريض <span style="color: red;">*</span></label>
+                    <input type="text" id="batchNumber" required placeholder="أدخل رقم أو اسم دفعتك">
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; font-weight: bold; font-size: 1.1rem;">بدء الامتحان الآن (أسئلة متنوعة)</button>
+            </form>
+        </div>
+
+        <!-- Exam Form -->
+        <form id="examForm" action="https://formspree.io/f/xljdbqok" method="POST" class="hidden">
+            
+            <input type="hidden" name="اسم_الطالب" id="hiddenStudentName">
+            <input type="hidden" name="رقم_الدفعة" id="hiddenBatchNumber">
+            <input type="hidden" name="الدرجة_النهائية" id="hiddenFinalScore">
+            <input type="hidden" name="تقرير_الأخطاء" id="hiddenErrorReport">
+
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+
+            <div class="card" id="questionsContainer">
+                <!-- Javascript will load questions here automatically -->
+            </div>
+
+            <div class="nav-buttons">
+                <button type="button" id="prevBtn" class="btn btn-secondary" onclick="changeQuestion(-1)" disabled>السابق</button>
+                <button type="button" id="nextBtn" class="btn" onclick="changeQuestion(1)">التالي</button>
+                <button type="button" id="submitBtn" class="btn btn-success hidden" onclick="gradeAndSubmit()">تسليم الامتحان وإظهار النتيجة</button>
+            </div>
+        </form>
+
+        <!-- Result & Review Card -->
+        <div id="resultCard" class="card hidden">
+            <h2 style="color: var(--primary-color); text-align: center;">نتيجة الامتحان التفاعلي</h2>
+            <div class="score-box">
+                <div>الدرجة الكلية والنتيجة:</div>
+                <div class="score-number" id="scoreDisplay">0 / 100</div>
+                <div id="scorePercentage" style="font-weight: bold; margin-top: 5px;"></div>
+                <div id="scoreMessage" style="margin-top: 10px; font-weight: bold;"></div>
+            </div>
+
+            <h3 style="color: var(--primary-color); border-bottom: 2px solid var(--border-color); padding-bottom: 8px;">مراجعة الإجابات والتصحيح التفصيلي:</h3>
+            <div id="reviewContainer"></div>
+
+            <div style="text-align: center; margin-top: 25px;">
+                <p style="color: var(--secondary-color); font-weight: bold;">تم إرسال نسخة تفصيلية من هذا التقرير وإجاباتك إلى إدارة مركز أورسيتي للتدريب عبر الإيميل.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Diverse 50 Questions Data Base (MCQ, Fill Blanks, Definitions, Matching Select)
+        const questionsData = [
+            // --- قسم 1: أكمل الفراغات (Fill Blanks via Dropdown Options) ---
+            { type: "select", id: 1, badge: "أكمل الفراغ", title: "س1: زاوية الحقن العضلي", question: "يتم إعطاء الحقن العضلي (IM) بزاوية قدرها ......", options: ["45 أو 90 درجة", "15 درجة", "10 درجات", "30 درجة"], ans: "45 أو 90 درجة" },
+            { type: "select", id: 2, badge: "أكمل الفراغ", title: "س2: الكانولا البرتقالية", question: "الفراشة/الكانولا ذات المقاس 14 يكون لونها ...... وتُستخدم لنقل الدم.", options: ["برتقالي / أحمر", "أخضر", "وردي", "بنفسجي"], ans: "برتقالي / أحمر" },
+            { type: "select", id: 3, badge: "أكمل الفراغ", title: "س3: الكانولا الصفراء", question: "الكانولا مقاس 24 تكون بلون ...... وتستخدم للنساء والأطفال بمختلف الأعمار.", options: ["أصفر", "رمادي", "أزرق", "أبيض"], ans: "أصفر" },
+            { type: "select", id: 4, badge: "أكمل الفراغ", title: "س4: الكانولا البنفسجية", question: "الكانولا المخصصة للأطفال حديثي الولادة هي مقاس 26 ولونها ......", options: ["بنفسجي / أبيض", "وردي", "أخضر", "برتقالي"], ans: "بنفسجي / أبيض" },
+            { type: "select", id: 5, badge: "أكمل الفراغ", title: "س5: أعراض الضغط المرتفع", question: "من الأغذية التي تعمل على تخفيض ضغط الدم المرتفع الزبادي بالثوم و...... لاحتوائه على البوتاسيوم.", options: ["الموز", "محلول الملح", "القهوة", "الأملاح"], ans: "الموز" },
+            { type: "select", id: 6, badge: "أكمل الفراغ", title: "س6: معدل التنفس الطبيعي", question: "المعدل الطبيعي لمعدل التنفس لدى الإنسان البالغ الصحيح هو بين ...... نفس/دقيقة.", options: ["12 - 20", "30 - 60", "5 - 10", "25 - 35"], ans: "12 - 20" },
+            { type: "select", id: 7, badge: "أكمل الفراغ", title: "س7: المعدل الطبيعي للنبض", question: "معدل ضربات القلب الطبيعي لدى شخص بالغ في حالة الراحة هو بين ...... نبضة/دقيقة.", options: ["60 - 100", "100 - 160", "30 - 50", "120 - 150"], ans: "60 - 100" },
+            { type: "select", id: 8, badge: "أكمل الفراغ", title: "س8: زاوية الحقن الوريدي", question: "تكون زاوية الحقن الوريدي (IV) منخفضة وتتراوح بين ...... درجة.", options: ["10 / 15 / 25", "90", "45", "60"], ans: "10 / 15 / 25" },
+            { type: "select", id: 9, badge: "أكمل الفراغ", title: "س9: وضعية الحقنة الشرجية", question: "عند إعطاء الحقنة الشرجية (Enema) يوضع المريض في وضعية ...... الأيسر.", options: ["سيمز (Sims)", "الاستلقاء البطني", "الجلوس القائم", "الانبطاح"], ans: "سيمز (Sims)" },
+            { type: "select", id: 10, badge: "أكمل الفراغ", title: "س10: سكر الصائم الطبيعي", question: "يكون مستوى سكر الدم صائماً (FBS) طبيعياً تماماً إذا كان بين ...... mg/dL.", options: ["70 - 99", "100 - 125", "126 - 200", "أقل من 50"], ans: "70 - 99" },
+
+            // --- قسم 2: عرّف واختر المفهموم الصحيح (Definitions & Concepts) ---
+            { type: "mcq", id: 11, badge: "اختر المصطلح والتعريف", title: "س11: تعريف القسطرة البولية", question: "ما هو التعريف الدقيق للقسطرة البولية (Foley Catheter)؟", options: ["أنبوب مجوف ومرن يُدخل عبر مجرى البول لتفريغ وتصريف البول من المثانة", "أنبوب بلاستيكي يُدخل عبر الأنف لتغذية المعدة", "جهاز صغير يُركب بالوريد لإعطاء العلاج", "سائل معقم يُحقن بالوريد لتعويض السوائل"], ans: "أنبوب مجوف ومرن يُدخل عبر مجرى البول لتفريغ وتصريف البول من المثانة" },
+            { type: "mcq", id: 12, badge: "اختر المصطلح والتعريف", title: "س12: تعريف أنبوب المعدة NGT", question: "ما هو التعريف الصحيح لأنبوب المعدة (Ryle's Tube / NGT)؟", options: ["أنبوب بلاستيكي صغير يتم تركيبه عبر فتحة الأنف أو الفم للوصول للمعدة", "أنبوب مطاطي يُدخل في المستقيم لإفراغ الأمعاء", "إبرة معقمة تُحقن في العضلة الأليوية", "وصلة معقمة لتوصيل المحاليل الوريدية"], ans: "أنبوب بلاستيكي صغير يتم تركيبه عبر فتحة الأنف أو الفم للوصول للمعدة" },
+            { type: "mcq", id: 13, badge: "اختر المصطلح والتعريف", title: "س13: تعريف الحقنة الشرجية", question: "ما هو التعريف الصحيح للحقنة الشرجية (Enema)؟", options: ["إدخال سائل أو غاز إلى المستقيم لإفراغ الأمعاء والتنظيف أو لإعطاء الدواء", "حقن الدواء داخل الجلد لتشكيل بثرة صغرى", "تصريف البول المتراكم بالمثانة", "تركيب كانولا وريدية لنقل الدم"], ans: "إدخال سائل أو غاز إلى المستقيم لإفراغ الأمعاء والتنظيف أو لإعطاء الدواء" },
+            { type: "mcq", id: 14, badge: "اختر المصطلح والتعريف", title: "س14: تعريف الفراشة / الكانولا", question: "ما هو المفهوم العلمي للكانولا الوريدية (Line - Cannula)؟", options: ["جهاز صغير يُستخدم لإعطاء الجرع العلاجية ويريح المريض من كثرة الطعن", "سائل معقم يحتوي على الأملاح ومضادات الألم", "اختبار يُجرى للدم للتعرف على وجود أجسام مضادة", "تقنية لقص أظافر قدم مريض السكري"], ans: "جهاز صغير يُستخدم لإعطاء الجرع العلاجية ويريح المريض من كثرة الطعن" },
+            { type: "mcq", id: 15, badge: "اختر المصطلح والتعريف", title: "س15: تعريف مرص ضغط الدم", question: "ما هو التعريف الطبي لمرض ضغط الدم (Blood Pressure - BP)؟", options: ["حدوث ضغط مستمر على جدران الشرايين وزيادة عبء العمل على القلب والأوعية", "ارتفاع نسبة الجلوكوز في الدم بسبب نقص الإنسولين", "حدوث تفاعل بين مولد الضد والأجسام المضادة في الدم", "انخفاض الأكسجين عن 90% في الدم"], ans: "حدوث ضغط مستمر على جدران الشرايين وزيادة عبء العمل على القلب والأوعية" },
+            { type: "mcq", id: 16, badge: "اختر المصطلح والتعريف", title: "س16: مفهوم استقلالية المريض (Autonomy)", question: "ماذا يقصد بـ استقلالية المريض (Autonomy) في أخلاقيات التمريض؟", options: ["احترام حق المريض الكامل في اتخاذ القرار والموافقة المستنيرة", "تقديم أفضل رعاية جيدة للمريض", "عدم إلحاق أي أذى أو ضرر بالمريض", "المساواة بين جميع المرضى دون تمييز"], ans: "احترام حق المريض الكامل في اتخاذ القرار والموافقة المستنيرة" },
+            { type: "mcq", id: 17, badge: "اختر المصطلح والتعريف", title: "س17: مفهوم عدم الإضرار (Non-Maleficence)", question: "ماذا يقصد بمبدأ عدم الإضرار (Non-Maleficence)؟", options: ["تجنب إلحاق أي أذى بالمريض أثناء تقديم الرعاية", "احترام خصوصية وسرية بيانات المريض", "العدالة والمساواة بين المرضى", "العمل التقييمي بعد الإجراء"], ans: "تجنب إلحاق أي أذى بالمريض أثناء تقديم الرعاية" },
+            { type: "mcq", id: 18, badge: "اختر المصطلح والتعريف", title: "س18: مفهوم المحاليل الوريدية (IV Fluids)", question: "ما هي المحاليل الوريدية (IV Fluids)؟", options: ["سوائل معقمة ومصنعة تُحقن بالدم مباشرة لتعويض فقد السوائل والأدوية", "أنبوب يوصل البول لكيس الجمع", "مطهرات موضعية تستخدم لتعقيم الجلد", "حبوب فموية لخفض السكر"], ans: "سوائل معقمة ومصنعة تُحقن بالدم مباشرة لتعويض فقد السوائل والأدوية" },
+
+            // --- قسم 3: صل وطابق من القائمة (Matching Dropdowns) ---
+            { type: "select", id: 19, badge: "اختر من القائمة / تطابق", title: "س19: الاستخدام المناسب للكانولا الرمادية", question: "الكانولا ذات اللون الرمادي مقاس 16 تُستخدم لـ:", options: ["نقل الدم", "الأطفال حديثي الولادة", "اختبار الحساسية فقط", "الحقن الشرجية"], ans: "نقل الدم" },
+            { type: "select", id: 20, badge: "اختر من القائمة / تطابق", title: "س20: الاستخدام المناسب للكانولا الخضراء", question: "الكانولا ذات اللون الأخضر مقاس 18 تُستخدم بشكل رئيسي لـ:", options: ["الرجال", "الأطفال الرضع", "حديثي الولادة", "اختبار السل"], ans: "الرجال" },
+            { type: "select", id: 21, badge: "اختر من القائمة / تطابق", title: "س21: الاستخدام المناسب للكانولا الزرقاء", question: "الكانولا ذات اللون الأزرق مقاس 22 تُستخدم لـ:", options: ["النساء والأطفال مختلف الأعمار", "نقل الدم للبالغين", "حديثي الولادة فقط", "حقن العضل الشديد"], ans: "النساء والأطفال مختلف الأعمار" },
+            { type: "select", id: 22, badge: "اختر من القائمة / تطابق", title: "س22: دواء Flagyl Metronidazole", question: "ينتمي علاج Flagyl (Metronidazole) الوريدي إلى قائمة:", options: ["المضادات الحيوية (Anti Biotic)", "مسكنات الألم (Pain Killer)", "المغذيات المعوضة", "خافضات ضغط الدم"], ans: "المضادات الحيوية (Anti Biotic)" },
+            { type: "select", id: 23, badge: "اختر من القائمة / تطابق", title: "س23: دواء Panadol Paracetamol", question: "ينتمي علاج البنادول (Panadol / Paracetamol) إلى قائمة:", options: ["مسكنات الألم (Pain Killer)", "المضادات الحيوية", "المحاليل السكرية التعويضية", "مضادات تجلط الدم"], ans: "مسكنات الألم (Pain Killer)" },
+            { type: "select", id: 24, badge: "اختر من القائمة / تطابق", title: "س24: محلول Normal Saline (NS)", question: "ينتمي محلول (NS - D5% - RL) إلى قائمة:", options: ["معوضات / مغذيات (Parenteral Nutrition)", "المسكنات الموضعية", "الأدوية الكيميائية", "المطهرات الجراحية"], ans: "معوضات / مغذيات (Parenteral Nutrition)" },
+            { type: "select", id: 25, badge: "اختر من القائمة / تطابق", title: "س25: الموز والزبادي بالثوم", question: "تُصنف أغذية الموز والشوفان والزبادي بالثوم ضمن الأغذية التي تعمل على:", options: ["تخفيض ضغط الدم المرتفع", "رفع ضغط الدم المنخفض", "زيادة نسبة السكر الصائم", "رفع نسبة الأكسجين بالدم"], ans: "تخفيض ضغط الدم المرتفع" },
+            { type: "select", id: 26, badge: "اختر من القائمة / تطابق", title: "س26: الأملاح والقهوة الشديدة", question: "تُصنف أغذية الأملاح والقهوة الشاي والدهون ضمن الأغذية التي تعمل على:", options: ["رفع ضغط الدم", "تخفيض ضغط الدم", "علاج هبوط السكر", "تسكين الألم"], ans: "رفع ضغط الدم" },
+            { type: "select", id: 27, badge: "اختر من القائمة / تطابق", title: "س27: اختبار الحساسية والسل", question: "الحقن داخل الجلد (Intradermal - ID) يُستخدم بصفة خاصة لـ:", options: ["إجراء اختبارات الحساسية واختبار السل (Mantoux)", "تغذية المرضى في الغيبوبة", "إعطاء الجرعات الكبيرة من المحاليل", "تفريغ مثانة المريض"], ans: "إجراء اختبارات الحساسية واختبار السل (Mantoux)" },
+            { type: "select", id: 28, badge: "اختر من القائمة / تطابق", title: "س28: السكري من النوع الأول", question: "داء السكري من النوع الأول (Type 1 DM) يعتمد في علاجه كلياً على:", options: ["حقن الإنسولين لتلف خلايا بيتا", "الأدوية الفموية فقط", "الحمية الغذائية والرياضة فقط", "الحقن الوريدية للسكريات"], ans: "حقن الإنسولين لتلف خلايا بيتا" },
+
+            // --- قسم 4: أسئلة اختيار من متعدد متقدمة (Multi-Choice) ---
+            { type: "mcq", id: 29, badge: "اختيار من متعدد", title: "س29: سعة العضلة الأليوية العظمى", question: "كم تتحمل العضلة الأليوية العظمى (Gluteus Maximus) من المحلول أثناء الحقن العضلي؟", options: ["تحمل 8 مل إلى 10 مل من المحلول", "تحمل 1.5 مل فقط", "تحمل 2.5 مل", "تحمل 20 مل"], ans: "تحمل 8 مل إلى 10 مل من المحلول" },
+            { type: "mcq", id: 30, badge: "اختيار من متعدد", title: "س30: سعة العضلة المثلثة بالكتف", question: "كم تتحمل العضلة المثلثة الدالية (Deltoids) بكتف المريض البالغ؟", options: ["تتحمل 1.5 مل إلى 2 مل من المحلول", "تتحمل 10 مل", "تتحمل 8 مل", "تتحمل 5 مل"], ans: "تتحمل 1.5 مل إلى 2 مل من المحلول" },
+            { type: "mcq", id: 31, badge: "اختيار من متعدد", title: "س31: الشفط Aspiration عند ظهور الدم", question: "ما هو الإجراء الصحيح عند خروج دم في السرنجة أثناء اختبار الشفط قبل الحقن العضلي؟", options: ["إخراج الحقنة والتخلص منها وجلب حقنة جديدة بمحلول جديد", "الحقن ببطء في نفس الموضع", "تعديل الزاوية للوريد والحقن فوراً", "الضغط بالشاش ثم إكمال الحقن"], ans: "إخراج الحقنة والتخلص منها وجلب حقنة جديدة بمحلول جديد" },
+            { type: "mcq", id: 32, badge: "اختيار من متعدد", title: "س32: زمن الضغط بعد الحقن الوريدي", question: "بعد سحب الإبرة الحديدية للحقن الوريدي يجب الضغط على الموضع لمدة:", options: ["تتراوح بين 20 ثانية إلى 50 ثانية", "5 ثوانٍ", "10 دقائق", "لا يلزم الضغط"], ans: "تتراوح بين 20 ثانية إلى 50 ثانية" },
+            { type: "mcq", id: 33, badge: "اختيار من متعدد", title: "س33: أنظمة بنك الدم", question: "أنظمة فصائل الدم الرئيسية المعترف بها علمياً في بنوك الدم هي:", options: ["نظام ABO ونظام تحديد النوع Rh(D)", "نظام DKA و FBS", "نظام SpO2 و BP", "نظام NGT و Foley"], ans: "نظام ABO ونظام تحديد النوع Rh(D)" },
+            { type: "mcq", id: 34, badge: "اختيار من متعدد", title: "س34: أسباب تركيب القسطرة البولية", question: "من دواعي واستخدامات القسطرة البولية (Foley Catheter):", options: ["حبس البول، التبول اللاإرادي، الغيبوبة، والعمليات الجراحية", "الإمساك والتسمم الغذائي", "تركيب التغذية عبر الأنف", "قياس السكر التراكمي"], ans: "حبس البول، التبول اللاإرادي، الغيبوبة، والعمليات الجراحية" },
+            { type: "mcq", id: 35, badge: "اختيار من متعدد", title: "س35: دواعي استخدام أنبوب المعدة NGT", question: "يُستخدم أنبوب المعدة (Ryle's Tube / NGT) في الحالات التالية باستثناء:", options: ["اختبارات الحساسية والسل", "التغذية عند وجود خلل يمنع ابتلاع الطعام بالفم", "حالات الغيبوبة الشديدة", "إجراء عمليات بالفم أو الحلق"], ans: "اختبارات الحساسية والسل" },
+            { type: "mcq", id: 36, badge: "اختيار من متعدد", title: "س36: أجزاء وصلة المحلول Set Infusion", question: "تتكون وصلة المحلول الوريدي (Set Infusion) من عدة أجزاء منها:", options: ["الإبرة الحديدية والبلاستيكية ووحدة التحكم والمراقبة والاختبار", "أنبوب فولي والبالون الضاغط", "الرباط الضاغط التورنيكيت فقط", "الشرائط الزجاجية و المحلول الملح"], ans: "الإبرة الحديدية والبلاستيكية ووحدة التحكم والمراقبة والاختبار" },
+            { type: "mcq", id: 37, badge: "اختيار من متعدد", title: "س37: أسباب مرض ضغط الدم", question: "من أهم مسببات مرص ضغط الدم (BP):", options: ["العامل الوراثي، السمنة المفرطة، الإجهاد العضلي والفكري، والتدخين", "قص الأظافر بشكل مستقيم", "تناول الزبادي بالثوم والموز", "شرب الماء بكميات معتدلة"], ans: "العامل الوراثي، السمنة المفرطة، الإجهاد العضلي والفكري، والتدخين" },
+            { type: "mcq", id: 38, badge: "اختيار من متعدد", title: "س38: أعراض ارتفاع ضغط الدم Hyper Tension", question: "من أعراض ارتفاع ضغط الدم (Hyper Tension):", options: ["سخونة الجسم، العصبية الشديدة، الصداع وإحمرار العين، والقئ والدوخة", "برودة الأطراف والنعاس والكآبة", "الشعور بالعطش الشديد والبلادة", "هبوط السكر المفاجئ"], ans: "سخونة الجسم، العصبية الشديدة، الصداع وإحمرار العين، والقئ والدوخة" },
+            { type: "mcq", id: 39, badge: "اختيار من متعدد", title: "س39: أعراض انخفاض ضغط الدم Hypo Tension", question: "من أعراض انخفاض ضغط الدم (Hypo Tension):", options: ["برودة الأطراف، البلادة في التفكير، العطش الشديد، النعاس والكآبة", "سخونة الجسم والعصبية الشديدة", "احمرار العينين والصداع الشديد", "تنفس كوسمول العميق"], ans: "برودة الأطراف، البلادة في التفكير، العطش الشديد، النعاس والكآبة" },
+            { type: "mcq", id: 40, badge: "اختيار من متعدد", title: "س40: خطوة التقييم الأولى", question: "أول خطوة في العملية التمريضية (Nursing Process) هي:", options: ["التقييم (Assessment)", "التشخيص (Diagnosis)", "التخطيط (Planning)", "التنفيذ (Implementation)"], ans: "التقييم (Assessment)" },
+            { type: "mcq", id: 41, badge: "اختيار من متعدد", title: "س41: حرارة الإنسان الطبيعية", question: "درجة الحرارة الطبيعية للإنسان البالغ الصحيح هي بين:", options: ["36.5°C - 37.2°C", "38.5°C - 39.5°C", "35.0°C - 36.0°C", "37.5°C - 38.0°C"], ans: "36.5°C - 37.2°C" },
+            { type: "mcq", id: 42, badge: "اختيار من متعدد", title: "س42: أكسجين الدم الطبيعي SpO2", question: "معدل تشبع الأكسجين الطبيعي في الدم لدى الإنسان هو:", options: ["95% - 100%", "80% - 90%", "70% - 85%", "60% - 70%"], ans: "95% - 100%" },
+            { type: "mcq", id: 43, badge: "اختيار من متعدد", title: "س43: التعامل عند تفاعل نقل الدم", question: "إذا ظهرت أعراض حساسية وتفاعل أثناء نقل الدم للمريض، يجب فوراً:", options: ["إيقاف نقل الدم فوراً وفتح خط المحلول الملح العادي 0.9%", "زيادة سرعة النقل لإنهائه بسرعة", "إعطاء مسكن ومتابعة النقل", "إخراج الكانولا فوراً دون فتح محلول"], ans: "إيقاف نقل الدم فوراً وفتح خط المحلول الملح العادي 0.9%" },
+            { type: "mcq", id: 44, badge: "اختيار من متعدد", title: "س44: تشخيص السكري بـ FBS", question: "يُعتبر الشخص مصاباً بالسكري إذا كانت نتيجة سكر الصائم (FBS):", options: ["126 mg/dL أو أعلى", "70 - 99 mg/dL", "100 - 125 mg/dL", "أقل من 60 mg/dL"], ans: "126 mg/dL أو أعلى" },
+            { type: "mcq", id: 45, badge: "اختيار من متعدد", title: "س45: تشخيص السكري بالسكر التراكمي", question: "تكون القراءة مؤكدة لإصابة المريض بالسكري إذا كان التراكمي (HbA1c):", options: ["6.5% أو أعلى", "أقل من 5.7%", "5.7% - 6.4%", "أقل من 4.5%"], ans: "6.5% أو أعلى" },
+            { type: "mcq", id: 46, badge: "اختيار من متعدد", title: "س46: أعراض هبوط السكر الحاد", question: "تشمل أعراض هبوط السكر الحاد (Hypoglycemia):", options: ["تعرق بارد، زغللة بالعين، رجفة، وتسارع ضربات القلب ودوخة", "تنفس سريع ورائحة الفم مثل الأسيتون", "جفاف شديد وآلام حادة بالمعدة", "ارتفاع الشرايين والضغط"], ans: "تعرق بارد، زغللة بالعين، رجفة، وتسارع ضربات القلب ودوخة" },
+            { type: "mcq", id: 47, badge: "اختيار من متعدد", title: "س47: تطبيق قاعدة 15-15", question: "تُستخدم قاعدة 15-15 لعلاج هبوط السكر عن طريق إعطاء 15 جم سكر سريع ثم:", options: ["إعادة القياس بعد 15 دقيقة للمريض الواعي", "إعادة القياس بعد ساعة كاملة", "حقن إنسولين صافي فوراً", "إعطاء وجبة دسمة مباشرة"], ans: "إعادة القياس بعد 15 دقيقة للمريض الواعي" },
+            { type: "mcq", id: 48, badge: "اختيار من متعدد", title: "س48: إسعاف هبوط السكر لغير الواعي", question: "عند إصابة مريض السكري بهبوط حاد وهو غير واعٍ تماماً، يجب إجراء:", options: ["حقنه بـ Dextrose 50% IV بالوريد أو Glucagon IM ويمنع الفم تماماً", "إعطاؤه عصير بالفم بالتدريج", "وضع سكر تحت لسانه وهو مستلقي", "سقيه ماء بالملح"], ans: "حقنه بـ Dextrose 50% IV بالوريد أو Glucagon IM ويمنع الفم تماماً" },
+            { type: "mcq", id: 49, badge: "اختيار من متعدد", title: "س49: طريقة قص أظافر القدم السكرية", question: "للحفاظ على سلامة القدم السكرية، يُنصح بقص الأظافر بشكل:", options: ["مستقيم دون حواف حادة", "منحني دائر وعميق جداً", "مائل من الجوانب", "عشوائي"], ans: "مستقيم دون حواف حادة" },
+            { type: "mcq", id: 50, badge: "اختيار من متعدد", title: "س50: فحص فصائل الدم بـ Anti-D", question: "عند إضافة قطرة (Anti-D) لقطرة الدم وحدث تخثر (Agglutination)، هذا يعني أن عامل ريسوس:", options: ["موجب (+ Rh)", "سالب (- Rh)", "غير محدد", "فصيلة O فقط"], ans: "موجب (+ Rh)" }
+        ];
+
+        let currentQuestion = 1;
+        const totalQuestions = questionsData.length;
+
+        // Render Questions HTML dynamically
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            let html = '';
+            questionsData.forEach((q, index) => {
+                const qNum = index + 1;
+                if (q.type === 'mcq') {
+                    html += `
+                        <div class="question-card ${qNum === 1 ? 'active' : ''}" data-q="${qNum}">
+                            <span class="q-badge">${q.badge}</span>
+                            <h3 style="color: var(--primary-color); font-size: 1.1rem; margin-top: 5px;">${q.title}</h3>
+                            <p style="font-weight: bold; font-size: 1.05rem; margin-bottom: 15px;">${q.question}</p>
+                            ${q.options.map(opt => `
+                                <label class="option-label">
+                                    <input type="radio" name="q${qNum}" value="${opt}"> ${opt}
+                                </label>
+                            `).join('')}
+                        </div>
+                    `;
+                } else if (q.type === 'select') {
+                    html += `
+                        <div class="question-card ${qNum === 1 ? 'active' : ''}" data-q="${qNum}">
+                            <span class="q-badge">${q.badge}</span>
+                            <h3 style="color: var(--primary-color); font-size: 1.1rem; margin-top: 5px;">${q.title}</h3>
+                            <p style="font-weight: bold; font-size: 1.05rem; margin-bottom: 15px;">${q.question}</p>
+                            <div class="form-group">
+                                <label>اختر الخيار / التكملة المناسبة من القائمة:</label>
+                                <select name="q${qNum}">
+                                    <option value="لم يتم الإجابة">-- اضغط هنا للاختيار من القائمة --</option>
+                                    ${q.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            container.innerHTML = html;
+        }
+
+        renderQuestions();
+
+        // Registration Handle
+        document.getElementById('startExamForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('studentName').value.trim();
+            const batch = document.getElementById('batchNumber').value.trim();
+
+            if (name && batch) {
+                document.getElementById('hiddenStudentName').value = name;
+                document.getElementById('hiddenBatchNumber').value = batch;
+
+                document.getElementById('stripName').textContent = name;
+                document.getElementById('stripBatch').textContent = batch;
+
+                document.getElementById('registrationCard').classList.add('hidden');
+                document.getElementById('studentStrip').classList.remove('hidden');
+                document.getElementById('examForm').classList.remove('hidden');
+
+                updateProgress();
+            }
+        });
+
+        // Question Navigation
+        function changeQuestion(direction) {
+            const currentCard = document.querySelector(`.question-card[data-q="${currentQuestion}"]`);
+            currentCard.classList.remove('active');
+
+            currentQuestion += direction;
+
+            const nextCard = document.querySelector(`.question-card[data-q="${currentQuestion}"]`);
+            nextCard.classList.add('active');
+
+            document.getElementById('prevBtn').disabled = (currentQuestion === 1);
+            
+            if (currentQuestion === totalQuestions) {
+                document.getElementById('nextBtn').classList.add('hidden');
+                document.getElementById('submitBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('nextBtn').classList.remove('hidden');
+                document.getElementById('submitBtn').classList.add('hidden');
+            }
+
+            updateProgress();
+        }
+
+        function updateProgress() {
+            document.getElementById('stripProgress').textContent = `${currentQuestion} من ${totalQuestions}`;
+            const percentage = (currentQuestion / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = `${percentage}%`;
+        }
+
+        // Auto Grade & Submit
+        function gradeAndSubmit() {
+            let correctCount = 0;
+            let reviewHTML = "";
+            let errorReportText = "";
+
+            questionsData.forEach((qObj, index) => {
+                const qNum = index + 1;
+                const key = 'q' + qNum;
+                let userVal = "لم يتم الإجابة";
+
+                if (qObj.type === 'mcq') {
+                    const selected = document.querySelector(`input[name="${key}"]:checked`);
+                    if (selected) userVal = selected.value;
+                } else if (qObj.type === 'select') {
+                    const selectElem = document.querySelector(`select[name="${key}"]`);
+                    if (selectElem) userVal = selectElem.value;
+                }
+
+                const isCorrect = (userVal === qObj.ans);
+
+                if (isCorrect) {
+                    correctCount++;
+                    reviewHTML += `
+                        <div class="review-q correct">
+                            <strong>${qObj.title} [${qObj.badge}]</strong>
+                            <div class="user-ans-text">إجابتك: ${userVal} (صحيحة ✓ - درجتان)</div>
+                        </div>
+                    `;
+                } else {
+                    errorReportText += `[س${qNum} - ${qObj.badge} - خطأ]: إجابة الطالب: (${userVal}) | الإجابة النموذجية: (${qObj.ans})\n`;
+                    reviewHTML += `
+                        <div class="review-q incorrect">
+                            <strong>${qObj.title} [${qObj.badge}]</strong>
+                            <div class="user-ans-text" style="color: var(--danger-color);">إجابتك: ${userVal} (خاطئة ✗)</div>
+                            <div class="correct-ans-text">الإجابة النموذجية الصحيحة: ${qObj.ans}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            // Calculate score out of 100 (2 points per question)
+            const totalScore = correctCount * 2;
+            const percentage = Math.round((totalScore / 100) * 100);
+
+            document.getElementById('scoreDisplay').textContent = `${totalScore} / 100`;
+            document.getElementById('scorePercentage').textContent = `النسبة المئوية: ${percentage}% (${correctCount} من 50 إجابة صحيحة)`;
+
+            const msgElem = document.getElementById('scoreMessage');
+            if (percentage >= 85) {
+                msgElem.textContent = "ممتاز جداً! أداء استثنائي وعالي 🎉";
+                msgElem.style.color = "var(--success-color)";
+            } else if (percentage >= 60) {
+                msgElem.textContent = "جيد جداً! نتيجتك مرضية ويمكنك مراجعة الأسئلة الخاطئة 👍";
+                msgElem.style.color = "var(--accent-color)";
+            } else {
+                msgElem.textContent = "تحتاج لمراجعة إضافية للموضوعات والدروس الأساسية 📖";
+                msgElem.style.color = "var(--danger-color)";
+            }
+
+            // Set hidden values for Formspree Email
+            document.getElementById('hiddenFinalScore').value = `${totalScore} / 100 (${percentage}%)`;
+            document.getElementById('hiddenErrorReport').value = errorReportText || "ممتاز! لا توجد أي أخطاء، تحصل الطالب على الدرجة الكاملة 100/100.";
+
+            document.getElementById('reviewContainer').innerHTML = reviewHTML;
+
+            // Submit Form Data via Fetch to Email (Formspree)
+            const form = document.getElementById('examForm');
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            }).finally(() => {
+                document.getElementById('examForm').classList.add('hidden');
+                document.getElementById('studentStrip').classList.add('hidden');
+                document.getElementById('resultCard').classList.remove('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
